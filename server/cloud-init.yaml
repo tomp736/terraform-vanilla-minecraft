@@ -85,14 +85,19 @@ runcmd:
   - ufw allow ssh
   - ufw allow http
   - ufw allow https
+  - ufw allow 25575
   - ufw disable
   - ufw enable
   # Docker
   - usermod -aG docker ${username}
   - sudo systemctl restart docker
+  # sdb
+  - mkfs.ext4 /dev/sdb
+  - mkdir /mcdata
+  - mount /dev/sdb /mcdata
   # Finish
   - echo "Done."
+  - docker run -d -v /mcdata:/data -p 25565:25565 --name mc -e EULA=TRUE itzg/minecraft-server
   - touch /cloud-init-ran
-  - reboot
 
 final_message: "The system is up after $UPTIME seconds"

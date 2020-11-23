@@ -18,6 +18,12 @@ provider "hcloud" {
 }
 
 ########### Server ###########
+resource "hcloud_volume_attachment" "main" {
+  volume_id = hcloud_volume.volume1.id
+  server_id = hcloud_server.server.id
+  automount = true
+}
+
 resource "hcloud_server" "server" {
   name = "mc-docker"
   location = "fsn1"
@@ -27,6 +33,10 @@ resource "hcloud_server" "server" {
   user_data = data.template_file.cloud-init-yaml.rendered
 }
 
+resource "hcloud_volume" "volume1" {
+  name = "mcdata"
+  size = 10
+}
 ########### Output ###########
 output "server_ipv4" {
   value = hcloud_server.server.ipv4_address
