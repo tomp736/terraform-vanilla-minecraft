@@ -11,5 +11,5 @@ mkdir -p "${backupdir}/${time_stamp}"
 
 ssh ${username}@${ip_address} 'docker stop mc'
 scp -r ${username}@${ip_address}:/mcdata/* "${backupdir}/${time_stamp}"
-echo ${time_stamp} >> ${backupdir}/lastbackup
+echo ${time_stamp} > ${backupdir}/lastbackup
 ssh ${username}@${ip_address} 'docker start mc'

@@ -34,6 +34,7 @@ resource "hcloud_server" "server" {
 }
 
 resource "hcloud_volume" "volume1" {
+  location = "fsn1"
   name = "mcdata"
   size = 10
 }
