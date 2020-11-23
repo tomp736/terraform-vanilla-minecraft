@@ -1,3 +1,4 @@
 secrets.tfvars
 *.tfstate*
 **/.terraform/**
+shvars
