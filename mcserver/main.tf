@@ -19,13 +19,13 @@ provider "hcloud" {
 
 ########### Server ###########
 resource "hcloud_volume_attachment" "main" {
-  volume_id = hcloud_volume.volume1.id
-  server_id = hcloud_server.server.id
+  volume_id = hcloud_volume.mcdata.id
+  server_id = hcloud_server.mcserver.id
   automount = true
 }
 
-resource "hcloud_server" "server" {
-  name = "mc-docker"
+resource "hcloud_server" "mcserver" {
+  name = "mc-server"
   location = "fsn1"
   image = "ubuntu-18.04"
   backups = true
@@ -33,15 +33,15 @@ resource "hcloud_server" "server" {
   user_data = data.template_file.cloud-init-yaml.rendered
 }
 
-resource "hcloud_volume" "volume1" {
+resource "hcloud_volume" "mcdata" {
   location = "fsn1"
-  name = "mcdata"
+  name = "mc-data"
   size = 10
 }
 ########### Output ###########
 output "server_ipv4" {
-  value = hcloud_server.server.ipv4_address
+  value = hcloud_server.mcserver.ipv4_address
 }
 output "server_ipv6" {
-  value = hcloud_server.server.ipv6_address
+  value = hcloud_server.mcserver.ipv6_address
 }

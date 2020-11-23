@@ -21,6 +21,8 @@ packages:
   - ufw
   - unattended-upgrades
   - docker.io
+  - zip
+  - unzip
 
 # Update/Upgrade, Reboot if required
 package_update: true
@@ -95,9 +97,13 @@ runcmd:
   - mkfs.ext4 /dev/sdb
   - mkdir /mcdata
   - mount /dev/sdb /mcdata
+  - mkdir -p /mcdata/mods
+  - chown mc:admin /mcdata/mods
+  - mkdir -p /mcdata/server
+  - chown mc:admin /mcdata/server
   # Finish
   - echo "Done."
-  - docker run -d -v /mcdata:/data -p 25565:25565 --name mc -e EULA=TRUE itzg/minecraft-server
+  - docker run -d -v /mcdata/server:/data -p 25565:25565 --name mc -e EULA=TRUE itzg/minecraft-server
   - touch /cloud-init-ran
 
 final_message: "The system is up after $UPTIME seconds"
