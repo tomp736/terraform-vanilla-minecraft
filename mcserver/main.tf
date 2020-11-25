@@ -21,17 +21,21 @@ provider "hcloud" {
 resource "hcloud_volume_attachment" "main" {
   volume_id = hcloud_volume.mcdata.id
   server_id = hcloud_server.mcserver.id
-  automount = true
+
+  provisioner "file" {
+    source        = "mcserver/setup_volume.sh"
+    destination   = "/tmp/setup_volume.sh"
+    connection {
+      host        = hcloud_server.mcserver.ipv4_address
+      user        = var.username
+      private_key = file("~/.ssh/id_rsa")
+    }
+  }
 
   provisioner "remote-exec" {
     inline = [
-      "sudo mkfs.ext4 /dev/sdb",
-      "sudo mkdir /mcdata",
-      "sudo mount /dev/sdb /mcdata",
-      "sudo mkdir -p /mcdata/mods",
-      "sudo chown mc:admin /mcdata/mods",
-      "sudo mkdir -p /mcdata/server",
-      "sudo chown mc:admin /mcdata/server",
+      "chmod +x /tmp/setup_volume.sh",
+      "sudo /tmp/setup_volume.sh \"/dev/sdb\" \"/mcdata\""
     ]
     connection {
       host        = hcloud_server.mcserver.ipv4_address
@@ -48,6 +52,11 @@ resource "hcloud_server" "mcserver" {
   backups = true
   server_type = "cx21"
   user_data = data.template_file.cloud-init-yaml.rendered
+
+  ##### emit ipv4 for scripts ######
+  provisioner "local-exec" {
+    command = "echo ${hcloud_server.mcserver.ipv4_address} > .serverassets/ipv4_address"
+  }
 }
 
 resource "hcloud_volume" "mcdata" {
