@@ -22,6 +22,23 @@ resource "hcloud_volume_attachment" "main" {
   volume_id = hcloud_volume.mcdata.id
   server_id = hcloud_server.mcserver.id
   automount = true
+
+  provisioner "remote-exec" {
+    inline = [
+      "sudo mkfs.ext4 /dev/sdb",
+      "sudo mkdir /mcdata",
+      "sudo mount /dev/sdb /mcdata",
+      "sudo mkdir -p /mcdata/mods",
+      "sudo chown mc:admin /mcdata/mods",
+      "sudo mkdir -p /mcdata/server",
+      "sudo chown mc:admin /mcdata/server",
+    ]
+    connection {
+      host        = hcloud_server.mcserver.ipv4_address
+      user        = var.username
+      private_key = file("~/.ssh/id_rsa")
+    }
+  }
 }
 
 resource "hcloud_server" "mcserver" {

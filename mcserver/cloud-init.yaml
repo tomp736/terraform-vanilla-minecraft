@@ -93,14 +93,6 @@ runcmd:
   # Docker
   - usermod -aG docker ${username}
   - sudo systemctl restart docker
-  # sdb
-  - mkfs.ext4 /dev/sdb
-  - mkdir /mcdata
-  - mount /dev/sdb /mcdata
-  - mkdir -p /mcdata/mods
-  - chown mc:admin /mcdata/mods
-  - mkdir -p /mcdata/server
-  - chown mc:admin /mcdata/server
   # Finish
   - echo "Done."
   - docker run -d -v /mcdata/server:/data -p 25565:25565 --name mc -e EULA=TRUE itzg/minecraft-server
