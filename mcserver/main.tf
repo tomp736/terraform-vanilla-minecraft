@@ -2,6 +2,11 @@
 variable "hcloud_token" {}
 variable "username" {}
 variable "sshkey" {}
+variable "restore_point" {}
+variable "restore_local_backup" {
+  description = "If set to true, restore backup during provision"
+  type        = bool
+}
 
 ########### Data ###########
 data "template_file" "cloud-init-yaml" {
@@ -32,10 +37,24 @@ resource "hcloud_volume_attachment" "main" {
     }
   }
 
+  provisioner "file" {
+    source        = "mcserver/manage.sh"
+    destination   = "/tmp/manage.sh"
+    connection {
+      host        = hcloud_server.mcserver.ipv4_address
+      user        = var.username
+      private_key = file("~/.ssh/id_rsa")
+    }
+  }
+
   provisioner "remote-exec" {
     inline = [
       "chmod +x /tmp/setup_volume.sh",
-      "sudo /tmp/setup_volume.sh \"/dev/sdb\" \"/mcdata\""
+      "sudo /tmp/setup_volume.sh \"/dev/sdb\" \"/mcdata\"",
+      "rm /tmp/setup_volume.sh",
+      "sudo mv /tmp/manage.sh /mcdata/manage.sh",
+      "sudo chown mc:admin /mcdata/manage.sh",
+      "sudo chmod +x /mcdata/manage.sh"
     ]
     connection {
       host        = hcloud_server.mcserver.ipv4_address
@@ -55,8 +74,33 @@ resource "hcloud_server" "mcserver" {
 
   ##### emit ipv4 for scripts ######
   provisioner "local-exec" {
-    command = "echo ${hcloud_server.mcserver.ipv4_address} > .serverassets/ipv4_address"
+    command = "echo ${hcloud_server.mcserver.ipv4_address} > .serverassets/etc/ipv4_address"
   }
+}
+
+resource "null_resource" "restore_backups" {
+  count = var.restore_local_backups ? 1 : 0
+
+  provisioner "file" {
+    source        = ".serverassets/backups/last_backup"
+    destination   = "/mcdata/backups/last_backup"
+    connection {
+      host        = hcloud_server.mcserver.ipv4_address
+      user        = var.username
+      private_key = file("~/.ssh/id_rsa")
+    }
+  }
+
+  provisioner "file" {
+    source        = ".serverassets/backups/${var.restore_point}"
+    destination   = "/mcdata/backups"
+    connection {
+      host        = hcloud_server.mcserver.ipv4_address
+      user        = var.username
+      private_key = file("~/.ssh/id_rsa")
+    }
+  }
+  depends_on = [hcloud_volume_attachment.main]
 }
 
 resource "hcloud_volume" "mcdata" {

@@ -95,7 +95,10 @@ runcmd:
   - sudo systemctl restart docker
   # Finish
   - echo "Done."
-  - docker run -d -v /mcdata/server:/data -p 25565:25565 --name mc -e EULA=TRUE itzg/minecraft-server
+  - /mcdata/manage.sh --init mc
+  - /mcdata/manage.sh --create
+  - /mcdata/manage.sh --restore
+  - /mcdata/manage.sh --start
   - touch /cloud-init-ran
 
 final_message: "The system is up after $UPTIME seconds"

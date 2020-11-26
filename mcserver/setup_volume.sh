@@ -20,6 +20,8 @@ create_mc_directories()
     chown mc:admin $path/mods
     mkdir -p $path/server
     chown mc:admin $path/server
+    mkdir -p $path/backups
+    chown mc:admin $path/backups
 }
 
 format_mount_disk $1 $2

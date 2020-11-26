@@ -7,6 +7,9 @@ variable "sshkey_location" {}
 data "template_file" "sshkey" {
   template = file(var.sshkey_location)
 }
+data "template_file" "backup" {
+  template = file(var.backup_location)
+}
 
 ########### Modules ###########
 module "mcserver"{
@@ -14,6 +17,8 @@ module "mcserver"{
   hcloud_token = var.hcloud_token
   username = var.username
   sshkey = data.template_file.sshkey.rendered
+  restore_local_backup = true
+  restore_point = data.template_file.backup.rendered
 }
 
 ########### Output ###########

@@ -1,10 +1,8 @@
 #!/bin/sh
 . ./shvars
 
-last_backup_dir="$backupdir/$last_backup"
-
-if [ -d "$last_backup_dir" ]; then
-    ssh ${username}@${ipv4_address} 'docker stop mc'
-    scp -r ${last_backup_dir}/* ${username}@${ipv4_address}:/mcdata/server
-    ssh ${username}@${ipv4_address} 'docker start mc'
+if [ -f "$last_backup_path" ]; then
+    scp $last_backup_path ${username}@${ipv4_address}:/mcdata/backups/last_backup 
+    scp -r $backupdir/$last_backup ${username}@${ipv4_address}:/mcdata/backups
+    ssh ${username}@${ipv4_address} '/mcdata/manage.sh --restore'
 fi
